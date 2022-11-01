@@ -1,0 +1,26 @@
+wheel
+djangorestframework
+#для настройки поиска и фильтрации
+django-filter
+#для проверки аутентификации пользователя
+djangorestframework-simplejwt
+#для создания swagger
+drf-yasg
+#для шифрования пароля
+python-decouple
+#для работы с картинками
+Pillow
+#для связи с СУБД PostgreSQL
+psycopg2-binary
+#для использования слагов
+python-slugify
+#для управления очередями задач
+celery
+#хранилище данных в памяти
+redis
+#для извлечения данных из HTML и XML (парсинг)
+beautifulsoup4
+#для отправки и обработки запросов (парсинг)
+requests
+#для связи с СУБД
+peewee
