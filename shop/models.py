@@ -8,7 +8,7 @@ User = get_user_model()
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=200, db_index=True)
+    name = models.CharField(max_length=200, db_index=True, primary_key=True)
     slug = models.SlugField(max_length=200, db_index=True, unique=True)
 
     class Meta:

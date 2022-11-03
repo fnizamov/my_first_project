@@ -10,7 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
+from decouple import config
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^hwu2-c-r8$a%$w4y6sur-(v6@b(1mb&s9m+!=08tk%gmdg@%d'
+SECRET_KEY = 'z_k!_-@=g*t6md$e)1i=+gn_y_o$qizbv(ucmzz0qf7^em0^l^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', cast=bool, default=False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 
 
 # Application definition
@@ -83,8 +86,12 @@ WSGI_APPLICATION = 'myshop.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': config('DB_ENGINE'),
+        'NAME': config('DB_NAME'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD')
     }
 }
 
@@ -111,9 +118,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = config('LANGUAGE_CODE', default='ru')
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = config('TZ', default='UTC')
 
 USE_I18N = True
 
@@ -124,8 +131,40 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+MEDIA_URL = 'products/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'products')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKENDS = 'django.core.mail.backends.smtp.EmailBackend' # класс отвечающий за отправку писем
+EMAIL_HOST_USER = config('EMAIL_HOST_USER') # почта с которой отправляются письма
+EMAIL_PORT = config('EMAIL_PORT', default=587)
+EMAIL_HOST = config('EMAIL_HOST') # какой хост используется для отправки писем
+EMAIL_HOST_PASSWORD = config('EMAIL_PASSWORD') # пароль от почты
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool) # вид соединения для отправки писем
+
+AUTH_USER_MODEL = 'registration.User'
+
+REST_FRAMEWORK = {
+'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 3,
+    'SEARCH_PARAM': 'q'
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'USER_ID_FIELD': 'username',
+    'AUTH_HEADER_TYPES': ('Bearer', 'Token'),
+}
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
