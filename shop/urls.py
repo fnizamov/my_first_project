@@ -6,6 +6,6 @@ from .views import ProductViewSet, TagViewSet, CommentCreateDeleteView
 router = DefaultRouter()
 router.register('product', ProductViewSet, 'product')
 router.register('comment', CommentCreateDeleteView, 'comment')
-router.register('tags', TagViewSet, 'tags')
+router.register('tag', TagViewSet, 'tag')
 urlpatterns = []
 urlpatterns += router.urls

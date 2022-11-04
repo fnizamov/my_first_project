@@ -1,25 +1,24 @@
-from django.shortcuts import render, get_object_or_404
-from requests import request
 from rest_framework import mixins, status, filters
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
-# from rest_framework.generics import ListAPIView
 from django_filters import rest_framework as rest_filter
 
 from .models import (
     Category, 
     Product, 
     Comment,
-    Tag
+    Tag,
+    Rating
 )
 from .serializers import (
     CommentSerializer,
     ProductSerializer,
     CategoryListSerializer,
     ProductCreateSerializer,
-    TagSerializer
+    TagSerializer,
+    RatingSerializer
 )
 
 from .permissions import IsOwner
@@ -92,13 +91,37 @@ class ProductViewSet(ModelViewSet):
 
     @action(detail=True, methods=['POST', 'DELETE'])
     def comment(self, request, pk=None):
-        post = self.get_object()
+        product = self.get_object()
         serializer = CommentSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save(user=request.user, post=post)
+            serializer.save(user=request.user, product=product)
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
                 )
+
+    @action(methods=['POST', 'PATCH'], detail=True, url_path='set-rating')
+    def set_rating(self, request, pk=None):
+        data = request.data.copy()
+        data['product'] = pk
+        serializer = RatingSerializer(data=data,context={'request': request})
+        rate = Rating.objects.filter(
+            user=request.user,
+            product=pk
+        ).first()
+        if serializer.is_valid(raise_exception=True):
+            if rate and request.method == 'POST':
+                return Response(
+                    {'detail': 'Вы уже ставили оценку данному товару. Чтобы изменить оценку, воспользуйтесь методом PATCH'}
+                )
+            elif rate and request.method == 'PATCH':
+                serializer.update(rate, serializer.validated_data)
+                return Response('Оценка изменена!')
+            elif request.method == 'POST':
+                serializer.create(serializer.validated_data)
+                return Response(serializer.data)
+            else:
+                return Response({'detail': 'Вы еще не ставили оценку данному товару. Чтобы оценить товар воспользуйтесь методом POST.'})
+
 
 class CommentCreateDeleteView(
     mixins.DestroyModelMixin,
@@ -124,30 +147,3 @@ class TagViewSet(
         if self.action == 'destroy':
             self.permission_classes = [IsAdminUser]
         return super().get_permissions()
-    
-    # def product_list(request, category_slug=None):
-    #     category = None
-    #     categories = Category.objects.all()
-    #     products = Product.objects.filter(available=True)
-    #     if category_slug:
-    #         category = get_object_or_404(Category, slug=category_slug)
-    #         products = products.filter(category=category)
-    #     return render(
-    #         request,
-    #         'shop/product/list.html',
-    #         {'category': category,
-    #         'categories': categories,
-    #         'products': products}
-    #     )
-
-    # def product_detail(request, id, slug):
-    #     product = get_object_or_404(
-    #         Product,
-    #         id=id,
-    #         slug=slug,
-    #         available=True)
-    #     return render(
-    #         request,
-    #         'shop/product/detail.html',
-    #         {'product': product}
-    #     )

@@ -17,10 +17,10 @@ class TabularInLineImages(admin.TabularInline):
 
 class ProductAdmin(admin.ModelAdmin):
     model = Product
-    list_display = ['name', 'slug', 'price', 'stock', 'available', 'created', 'updated', 'tag']
+    list_display = ['name', 'slug', 'price', 'stock', 'available', 'created', 'updated']
     list_filter = ['available', 'created', 'updated']
     list_editable = ['price', 'stock', 'available']
     prepopulated_fields = {'slug': ('name',)}
     inlines = [TabularInLineImages]
 
-admin.site.register(Product, CategoryAdmin)
+admin.site.register(Product, ProductAdmin)
