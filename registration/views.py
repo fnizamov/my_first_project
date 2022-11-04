@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.permissions import IsAuthenticated
 
@@ -84,7 +85,7 @@ class DeleteAccountView(APIView):
 
     def delete(self, request: Request):
         username = request.user.username
-        User.objects.get(username=username).delete()
+        User.objects.filter(username=username).delete()
         return Response(
             'Account deleted succsessfully',
             status=status.HTTP_204_NO_CONTENT
@@ -95,8 +96,8 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request: Request):
-        username = request.user.username
-        User.objects.filter(username=username).delete()
+        user = request.user
+        Token.objects.filter(user=user).delete()
         return Response(
             'Вы вышли из учетной записи. До свидания!',
             status=status.HTTP_200_OK

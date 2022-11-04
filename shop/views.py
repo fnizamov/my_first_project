@@ -34,7 +34,7 @@ class CategoryViewSet(ModelViewSet):
         filters.OrderingFilter
     ]
     search_fields = ['name']
-    filterset_fields = ['tag']
+    filterset_fields = ['slug']
     ordering_fields = ['created']
 
     def perform_create(self, serializer):
@@ -66,7 +66,7 @@ class ProductViewSet(ModelViewSet):
         filters.OrderingFilter
     ]
     search_fields = ['name', 'user__username']
-    filterset_fields = ['tag']
+    filterset_fields = ['slug']
     ordering_fields = ['created']
 
     def perform_create(self, serializer):

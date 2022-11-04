@@ -21,6 +21,12 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    user = models.ForeignKey(
+        verbose_name='Продавец',
+        to=User,
+        on_delete=models.CASCADE,
+        related_name='products'
+    )
     category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE)
     name = models.CharField(max_length=200, db_index=True)
     slug = models.SlugField(max_length=200, db_index=True)
@@ -31,7 +37,12 @@ class Product(models.Model):
     available = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-
+    tag = models.ManyToManyField(
+        to='Tag',
+        related_name='products',
+        blank=True
+    )
+        
     class Meta:
         ordering = ('name',)
         index_together = (('id', 'slug'))
